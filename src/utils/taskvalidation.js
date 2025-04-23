@@ -1,5 +1,4 @@
 import Joi from "joi";
-import { join } from "node:path/win32";
 
 const task = Joi.object({
     title: Joi.string().min(2).required(),

@@ -10,10 +10,12 @@ export class taskController {
                 throw new Error(`Error on creating task: ${error}`)
             }
 
-            const {title, description, status} = value
+            const { title, description, status, role } = value;
             const newTask = await Task.create({
-                title, description, status
-                
+              title,
+              description,
+              status,
+              role
             });
             return res.status(201).json({
                 statusCode: 201,
@@ -81,6 +83,12 @@ export class taskController {
             const task = await Task.findById(id);
             if (!task) {
                 throw new Error('Task not found');
+            }
+            if (task.role === 'owner') {
+                return res.status(400).json({
+                    statusCode: 400,
+                    message: 'Danggg'
+                })
             }
             await Task.findByIdAndDelete(id);
             return res.status(200).json({
