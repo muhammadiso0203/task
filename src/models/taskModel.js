@@ -1,9 +1,9 @@
-import { model, Schema } from 'mongoose';
+import mongoose, { model, mongo, Schema } from 'mongoose';
 
 const taskSchema = new Schema({
     title: { type: String, required: true, trim: true },
     
-    role: { type: String, enum: ['owner', 'assignee', 'wiever'], required: true, default: 'wiever' },
+    user_role: {type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true},
     
     description: { type: String, default: '' },
     

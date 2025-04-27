@@ -1,5 +1,6 @@
-export const catchError = (err, res) => {
-    return res.status(500).json({
-        error: err.message
+export const catchError = (res, code, err) => {
+    return res.status(code).json({
+        statusCOde: code,
+        message: err
     });
 }

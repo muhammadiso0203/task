@@ -1,13 +1,15 @@
+import { error } from "console";
 import Task from "../models/taskModel.js";
 import { catchError } from "../utils/error-response.js";
 import { taskValidation } from "../utils/taskvalidation.js";
+import e from "express";
 
 export class taskController {
     async createTask(req, res) {
         try {
             const { error, value } = taskValidation(req.body);
             if (error) {
-                throw new Error(`Error on creating task: ${error}`)
+                catchError(res, 500, error)
             }
 
             const { title, description, status, role } = value;
@@ -38,7 +40,7 @@ export class taskController {
                 data: tasks
             });
         } catch (error) {
-            catchError(error, res);
+            catchError(res, 500, error.message);
         }
     }
 
@@ -47,7 +49,7 @@ export class taskController {
             const id = req.params.id;
             const task = await Task.findById(id);
             if (!task) {
-                throw new Error('Task not found');
+                catchError(res, 404, error.message)
             }
             return res.status(200).json({
                 statusCode: 200,
@@ -55,7 +57,7 @@ export class taskController {
                 data: task
             });
         } catch (error) {
-            catchError(error, res)
+            catchError(res, 500, error.message);
         }
     }
 
@@ -64,7 +66,7 @@ export class taskController {
             const id = req.params.id;
             const task = await Task.findById(id);
             if (!task) {
-                throw new Error('Task not found');
+                catchError(res, 404, error.message)
             }
             const updateTask = await Task.findByIdAndUpdate(id, req.body, { new: true });
             return res.status(200).json({
@@ -73,7 +75,7 @@ export class taskController {
                 data: updateTask
             })
         } catch (error) {
-            catchError(error, res);
+            catchError(res, 500, error.message);
         }
     }
 
@@ -82,7 +84,7 @@ export class taskController {
             const id = req.params.id;
             const task = await Task.findById(id);
             if (!task) {
-                throw new Error('Task not found');
+                catchError(res, 404, error.message);
             }
             if (task.role === 'owner') {
                 return res.status(400).json({
@@ -97,7 +99,7 @@ export class taskController {
                 data: {}
             });
         } catch (error) {
-            catchError(error, res);
+            catchError(res, 500, error.message);
         }
     }
 }
