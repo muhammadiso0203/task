@@ -6,7 +6,6 @@ import {
   generateAccesToken,
   generateRefreshToken,
 } from "../utils/generateToken.js";
-import { error } from "console";
 import { transporter } from "../utils/mailer.js";
 
 export class userController {
@@ -29,7 +28,7 @@ export class userController {
       return res.status(201).json({
         statusCode: 201,
         message: "succes",
-        data: User,
+        data: newUser,
       });
     } catch (error) {
       catchError(res, 500, error.message);
@@ -81,6 +80,35 @@ export class userController {
       });
     } catch (error) {
       catchError(res, 500, error.message);
+    }
+  }
+
+  async confirmSigninUser(req, res) {
+    try {
+      const { email, otp } = req.body;
+      const user = await User.findOne({ email });
+      if (!user) {
+        catchError(res, 404, 'Admin not found')
+      }
+      const otpCache = getCache(email);
+      if (!otpCache || otp != otpCache) {
+        catchError(res, 400, 'Otp expired');
+      }
+      const payload = { id: user._id, role: user.role }
+      const accesToken = generateAccesToken(payload);
+      const refreshToken = generateRefreshToken(payload);
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 30 * 24 * 60 * 60 * 1000
+      });
+      return res.status(200).json({
+        statusCode: 200,
+        message: 'succes',
+        data: accesToken
+      });
+    } catch (error) {
+      
     }
   }
 
@@ -146,9 +174,10 @@ export class userController {
     }
   }
 
-  async getUserById(_, res) {
+  async getUserById(req, res) {
     try {
-      const user = await this.findById(req.params.id);
+      const user = await User.findById(req.params.id);
+      console.log(req.params.id)
       return res.status(200).json({
         statusCode: 200,
         message: "Succes",
@@ -161,8 +190,8 @@ export class userController {
 
   async updateById(req, res) {
     try {
-      await this.findById(req.params.id);
-      const updateUser = await User.findByIdAndUpdate(id, res.body, {
+      await User.findById(req.params.id);
+      const updateUser = await User.findByIdAndUpdate(req.params.id, req.body, {
         new: true,
       });
       return res.status(200).json({
@@ -170,7 +199,7 @@ export class userController {
         message: "Succes",
         data: updateUser,
       });
-    } catch {
+    } catch (error){
       catchError(res, 500, error.message);
     }
   }
@@ -181,13 +210,13 @@ export class userController {
       if (user.role === "admin") {
         catchError(res, 400, `Danggg\nUser admin cannot be delete`);
       }
-      await User.findByIdAndDelete(id);
+      await User.findByIdAndDelete(req.params.id);
       return res.status(200).json({
         statusCode: 200,
         message: "Succes",
         data: {},
       });
-    } catch {
+    } catch (error) {
       catchError(res, 500, error.message);
     }
   }

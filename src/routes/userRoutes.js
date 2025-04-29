@@ -11,5 +11,8 @@ router
     .post("/signout", JwtAuthGuard, controller.signoutUser)
     .post("/token", controller.accesToken)
     .get("/", controller.getAllUsers)
+    .get("/:id", controller.getUserById)
+    .put("/:id", controller.updateById)
+    .delete("/:id", controller.deleteById)
 
 export default router;
