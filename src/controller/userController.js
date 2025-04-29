@@ -1,12 +1,14 @@
 import User from "../models/usersModel.js";
 import { catchError } from "../utils/error-response.js";
-import { userValidator } from "../utils/userValidation.js";
+import { userValidator } from "../validation/userValidation.js";
 import { encode, decode } from "../utils/bcrypt-encrypt.js";
 import {
   generateAccesToken,
   generateRefreshToken,
 } from "../utils/generateToken.js";
 import { transporter } from "../utils/mailer.js";
+import { otpGenerator } from "../utils/otp-generator.js";
+import {getCache, setCache} from "../utils/cache.js"
 
 export class userController {
   async createUser(req, res) {
@@ -50,26 +52,19 @@ export class userController {
         catchError(res, 400, "Invalid password");
       }
 
-      const payload = { id: user._id, role: user.role };
-      const accesToken = generateAccesToken(payload);
-      const refreshToken = generateRefreshToken(payload);
-      res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-      });
-
+      const otp = otpGenerator();
       const mailMessage = {
         from: process.env.SMTP_USER,
         to: "muhammadiso0203@gmail.com",
         subject: "qalesan megajin dasturchi",
-        text: "Danggg",
+        text: otp,
       };
       transporter.sendMail(mailMessage, function (err, info) {
         if (err) {
           catchError(res, 400, `Error on sending to mail: ${err}`);
         } else {
           console.log(info);
+          setCache(user.email, otp);
         }
       });
 

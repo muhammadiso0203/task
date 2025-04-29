@@ -1,16 +1,16 @@
 import { Router } from "express";
 import { taskController } from "../controller/taskController.js";
-import { ownerGuard } from "../middleware/ownerGuard.js";
-import { selfGuard } from "../middleware/selfAdminGuard.js";
+// import { ownerGuard } from "../middleware/ownerGuard.js";
+// import { selfGuard } from "../middleware/selfAdminGuard.js";
 
 const router = Router()
 const controller = new taskController();
 
 router
-    .post('/', ownerGuard, controller.createTask)
+    .post('/', controller.createTask)
     .get('/', controller.getAllTask)
-    .get('/:id', selfGuard, controller.getTaskById)
+    .get('/:id', controller.getTaskById)
     .patch('/:id', controller.updateById)
-    .delete('/:id', ownerGuard, controller.deleteTaskById);
+    .delete('/:id', controller.deleteTaskById);
 
 export default router;

@@ -1,8 +1,8 @@
 import { error } from "console";
 import Task from "../models/taskModel.js";
 import { catchError } from "../utils/error-response.js";
-import { taskValidation } from "../utils/taskvalidation.js";
-import e from "express";
+import { taskValidation } from "../validation/taskvalidation.js";
+
 
 export class taskController {
     async createTask(req, res) {
